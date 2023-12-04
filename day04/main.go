@@ -11,7 +11,6 @@ import (
 //go:embed input.txt
 var data string
 var lines []string
-var sumOfCardValues int
 var reNum = regexp.MustCompile(`\d+`)
 
 func init() {
@@ -23,10 +22,10 @@ func init() {
 	lines = strings.Split(data, "\n")
 }
 
-func main() {
+func part1() {
+	sumOfCardValues := 0
 	start := time.Now()
 
-	// Code here
 	for _, line := range lines {
 		cardValue := 0
 
@@ -49,5 +48,20 @@ func main() {
 	fmt.Println("part1:", sumOfCardValues)
 
 	elapsed := time.Since(start)
-	fmt.Println("\nExecution time", elapsed.Seconds(), "s")
+	fmt.Println("Execution time", elapsed.Seconds(), "s")
+}
+
+func part2() {
+	start := time.Now()
+	totalCards := 0
+
+	fmt.Println("\npart2:", totalCards)
+
+	elapsed := time.Since(start)
+	fmt.Println("Execution time", elapsed.Seconds(), "s")
+}
+
+func main() {
+	part1()
+	part2()
 }
