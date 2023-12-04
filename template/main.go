@@ -9,12 +9,15 @@ import (
 
 //go:embed example.txt
 var data string
+var lines []string
 
 func init() {
 	data = strings.TrimRight(data, "\n")
 	if len(data) == 0 {
 		panic("empty data file")
 	}
+
+	lines = strings.Split(data, "\n")
 }
 
 func main() {
