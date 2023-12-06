@@ -35,8 +35,11 @@ func checkRace(times, distances []string) int {
 
 			if distance > distanceToBeat {
 				validOptions++
+			} else {
+				if validOptions > 0 {
+					break
+				}
 			}
-
 		}
 
 		res *= validOptions
@@ -46,17 +49,13 @@ func checkRace(times, distances []string) int {
 }
 
 func main() {
-
-	// Code here
 	re := regexp.MustCompile(`\d+`)
 
 	times := re.FindAllString(lines[0], -1)
 	distances := re.FindAllString(lines[1], -1)
 
-	mergedTime := strings.Join(times, "")
-	mergedDistance := strings.Join(distances, "")
-	timeArray := []string{mergedTime}
-	distanceArray := []string{mergedDistance}
+	timeArray := []string{strings.Join(times, "")}
+	distanceArray := []string{strings.Join(distances, "")}
 
 	startPart1 := time.Now()
 	part1 := checkRace(times, distances)
@@ -67,7 +66,6 @@ func main() {
 	startPart2 := time.Now()
 	part2 := checkRace(timeArray, distanceArray)
 	elapsedPart2 := time.Since(startPart2)
-
 	fmt.Println("\npart1:", part2)
 	fmt.Printf("Execution time %f s\n", elapsedPart2.Seconds())
 }
