@@ -3,6 +3,8 @@ package main
 import (
 	_ "embed"
 	"fmt"
+	"regexp"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -15,7 +17,10 @@ type Mapping struct {
 
 //go:embed example.txt
 var data string
-var lines []string
+var blocks []string
+var seeds []int
+var mappings map[string][]Mapping
+var reNum = regexp.MustCompile(`\d+`)
 
 func init() {
 	data = strings.TrimRight(data, "\n")
@@ -23,39 +28,61 @@ func init() {
 		panic("empty data file")
 	}
 
-	lines = strings.Split(data, "\n")
+	blocks = strings.Split(data, "\n\n")
+
+	// Get seed numbers from first block
+	seedNbAsStr := reNum.FindAllString(blocks[0][7:], -1)
+	seeds := make([]int, len(seedNbAsStr))
+	for i, seedNb := range seedNbAsStr {
+		seeds[i], _ = strconv.Atoi(seedNb)
+	}
+
+	// Add remaining as []Mapping in a map (in this house, we love maps)
+	mappings = make(map[string][]Mapping, len(blocks[1:]))
+	for _, block := range blocks[1:] {
+		blockLines := strings.Split(block, "\n")
+		mappingTitle := strings.Split(blockLines[0], " ")[0]
+
+		for _, line := range blockLines[1:] {
+			lineNbs := strings.Split(line, " ")
+			destination, _ := strconv.Atoi(lineNbs[0])
+			source, _ := strconv.Atoi(lineNbs[1])
+			length, _ := strconv.Atoi(lineNbs[2])
+
+			mappings[mappingTitle] = append(mappings[mappingTitle], Mapping{
+				Destination: destination,
+				Source: source,
+				Length: length,
+			})
+		}
+	}
 }
 
-func getMapped(nbToCheck int, mapToCompare [][]int) int {
-	/*
-		mapping = find mapping in mapToCompare where source < nbToCheck < (source + length)
-		if (mapping not found)
-			return nbToCheck
-		else
-			if (destination < source)
-				return seedNb - (source - destination)
-			else
-				return seedNb + (destination - source)
-	*/
-	var mapping []int
-
-	for _, potentialMap := range mapToCompare {
-		if nbToCheck >= potentialMap[1] && nbToCheck <= potentialMap[1] + potentialMap[2] {
-			mapping = potentialMap
+/*
+	Compares a number against an array of mappings.
+	If number correspond to a certain mapping, returns the mapped number.
+	Else, returns number directly.
+*/
+func getMapped(nbToCheck int, mappingList []Mapping) int {
+	// Search for matching mapping
+	var mapping Mapping
+	for _, potentialMapping := range mappingList {
+		if nbToCheck >= potentialMapping.Source && nbToCheck <= potentialMapping.Source + potentialMapping.Length {
+			mapping = potentialMapping
 			break
 		}
 	}
 
-	fmt.Println(nbToCheck, mapping)
-
-	if len(mapping) == 0 {
+	// If no mapping found, directly return nbToCheck
+	if mapping == (Mapping{}) {
 		return nbToCheck
 	}
 
-	if mapping[0] < mapping[1] {
-		return nbToCheck - (mapping[1] - mapping[0])
+	// Else, get the mapped number
+	if mapping.Destination < mapping.Source {
+		return nbToCheck - (mapping.Source - mapping.Destination)
 	} else {
-		return nbToCheck + (mapping[0] - mapping[1])
+		return nbToCheck + (mapping.Destination - mapping.Source)
 	}
 }
 
@@ -79,7 +106,10 @@ func main() {
 	start := time.Now()
 
 	// Code here
-	res := getMapped(6, [][]int{{0, 5, 4}, {6, 10, 4}, {52, 50, 48}})
+	// TODO: remove, test data
+	fmt.Println(mappings)
+
+	res := getMapped(98, mappings["seed-to-soil"])
 
 	fmt.Println("returned", res)
 
