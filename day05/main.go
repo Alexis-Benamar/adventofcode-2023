@@ -15,7 +15,7 @@ type Mapping struct {
 	Length int
 }
 
-//go:embed example.txt
+//go:embed input.txt
 var data string
 var blocks []string
 var seeds []int
@@ -32,7 +32,7 @@ func init() {
 
 	// Get seed numbers from first block
 	seedNbAsStr := reNum.FindAllString(blocks[0][7:], -1)
-	seeds := make([]int, len(seedNbAsStr))
+	seeds = make([]int, len(seedNbAsStr))
 	for i, seedNb := range seedNbAsStr {
 		seeds[i], _ = strconv.Atoi(seedNb)
 	}
@@ -86,32 +86,42 @@ func getMapped(nbToCheck int, mappingList []Mapping) int {
 	}
 }
 
+/*
+	Returns location, going through all mappings in order, for a given seed
+*/
 func getSeedLocation(seed int) int {
+	soil := getMapped(seed, mappings["seed-to-soil"])
+	fertilizer := getMapped(soil, mappings["soil-to-fertilizer"])
+	water := getMapped(fertilizer, mappings["fertilizer-to-water"])
+	light := getMapped(water, mappings["water-to-light"])
+	temp := getMapped(light, mappings["light-to-temperature"])
+	humidity := getMapped(temp, mappings["temperature-to-humidity"])
+	location := getMapped(humidity, mappings["humidity-to-location"])
+
+	return location
+}
+
+// TODO
+func getLowestLocationFromSeeds(seedNumbers []int) {
 	/*
-		soil := getMapped(seed, seedToSoil)
-		fertilizer := getMapped(soil, soilToFertilizer)
-		water := getMapped(fertilizer, fertilizerToWater)
-		light := getMapped(water, waterToLight)
-		temp := getMapped(light, lightToTemp)
-		humidity := getMapped(temp, tempToHumidity)
-		location := getMapped(humidity, humidityToLocation)
-
-		return location
+		Actual content of main
+		Use for both part1 and part2, just give it an array of seed numbers
 	*/
-
-	return 0
 }
 
 func main() {
 	start := time.Now()
 
-	// Code here
-	// TODO: remove, test data
-	fmt.Println(mappings)
+	// Check for all seeds's corresponding locations, and keep the lowest
+	var lowestLocation int
+	for _, seed := range seeds {
+		location := getSeedLocation(seed)
+		if lowestLocation == 0 || location < lowestLocation {
+			lowestLocation = location
+		}
+	}
 
-	res := getMapped(98, mappings["seed-to-soil"])
-
-	fmt.Println("returned", res)
+	fmt.Println("part1:", lowestLocation)
 
 	elapsed := time.Since(start)
 	fmt.Printf("\nExecution time %f s\n", elapsed.Seconds())
