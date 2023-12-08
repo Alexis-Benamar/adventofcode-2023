@@ -143,17 +143,6 @@ func getSeedFromLocation(location int) int {
 	return seed
 }
 
-func getLowestLocationFromSeeds(seedNumbers []int) (lowestLocation int) {
-	for _, seed := range seeds {
-		location := getLocationFromSeed(seed)
-		if lowestLocation == 0 || location < lowestLocation {
-			lowestLocation = location
-		}
-	}
-
-	return
-}
-
 func part1() {
 	start := time.Now()
 
