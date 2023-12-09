@@ -207,9 +207,9 @@ func sortHands(handsToSort []Hand, cardsOrder string) []Hand {
 func part1() {
 	start := time.Now()
 
+	totalWinnings := 0
 	part1Hands := sortHands(hands, "23456789TJQKA")
 
-	totalWinnings := 0
 	// Calculate total winnings by summing hand's bid * rank
 	for rank, hand := range part1Hands {
 		totalWinnings += hand.Bid * (rank + 1)
@@ -224,9 +224,9 @@ func part1() {
 func part2() {
 	start := time.Now()
 
-	part2Hands := sortHands(handsWithJoker, "J23456789TQKA")
-	fmt.Println(part2Hands)
 	totalWinnings := 0
+	part2Hands := sortHands(handsWithJoker, "J23456789TQKA")
+
 	// Calculate total winnings by summing hand's bid * rank
 	for rank, hand := range part2Hands {
 		totalWinnings += hand.Bid * (rank + 1)
