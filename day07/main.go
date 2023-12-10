@@ -32,7 +32,7 @@ var lines []string
 var hands, handsWithJoker []Hand
 
 /*
-Returns HandType by creating an array of different characters within cards
+Returns HandType by creating an map of all different cars with their occurence
 */
 func getHandType(cards string, withJoker bool) (handType HandType) {
 	diffChars := make(map[string]int, len(cards))
@@ -46,8 +46,9 @@ func getHandType(cards string, withJoker bool) (handType HandType) {
 	}
 
 	switch len(diffChars) {
-	// Must be High Hand
 	case 5:
+		// If it has a Joker, must be One Pair
+		// Else, must be High Hand
 		_, hasJ := diffChars["J"]
 
 		if withJoker && hasJ {
@@ -55,8 +56,9 @@ func getHandType(cards string, withJoker bool) (handType HandType) {
 		} else {
 			return HandType(0)
 		}
-	// Must be One Pair
 	case 4:
+		// If it has a Joker, must be Three of Kind
+		// Else, must be One Pair
 		_, hasJ := diffChars["J"]
 
 		if withJoker && hasJ {
@@ -64,18 +66,24 @@ func getHandType(cards string, withJoker bool) (handType HandType) {
 		} else {
 			return HandType(1)
 		}
-	// If at least one value == 2, must be Two Pair
-	// If at least one value == 3, must be Three of Kind
 	case 3:
+		/*
+			If it has a Joker
+				If Joken count > 1, must be Four of Kind
+				Else, if any card is present 3 times, must be Four of Kind
+				Else, must be Full House
+			Else
+				If any card is present 3 times, must be Three of Kind
+				Else, if any card is present 2 times, must be Two Pairs
+		*/
 		_, hasJ := diffChars["J"]
+		values := []int{}
+		for _, value := range diffChars {
+			values = append(values, value)
+		}
 
 		if withJoker && hasJ {
 			if diffChars["J"] == 1 {
-				values := []int{}
-				for _, value := range diffChars {
-					values = append(values, value)
-				}
-
 				if values[0] == 3 || values[1] == 3 || values[2] == 3 {
 					return HandType(5)
 				} else {
@@ -85,11 +93,6 @@ func getHandType(cards string, withJoker bool) (handType HandType) {
 				return HandType(5)
 			}
 		} else {
-			values := []int{}
-			for _, value := range diffChars {
-				values = append(values, value)
-			}
-
 			if values[0] == 2 || values[1] == 2 || values[2] == 2 {
 				return HandType(2)
 			}
@@ -98,10 +101,10 @@ func getHandType(cards string, withJoker bool) (handType HandType) {
 				return HandType(3)
 			}
 		}
-
-	// If at least one value == 2, must be Full House
-	// Else, must be Four of Kind
 	case 2:
+		// If it has a Joker, must be Five of Kind
+		// Else, if at least one value == 2, must be Full House
+		// Else, must be Four of Kind
 		values := []int{}
 		for _, value := range diffChars {
 			values = append(values, value)
@@ -117,8 +120,8 @@ func getHandType(cards string, withJoker bool) (handType HandType) {
 				return HandType(5)
 			}
 		}
-	// Must be Five of Kind
 	default:
+		// Must be Five of Kind
 		return HandType(6)
 	}
 
@@ -135,6 +138,7 @@ func init() {
 	hands = make([]Hand, len(lines))
 	handsWithJoker = make([]Hand, len(lines))
 
+	// Generate two hands for both part1 and part2
 	for i, line := range lines {
 		tokens := strings.Split(line, " ")
 		bid, _ := strconv.Atoi(tokens[1])
@@ -156,13 +160,14 @@ func init() {
 	}
 }
 
+// Apply a bubble sort
+// First compare types, then if types are the same, check first higher card
 func sortHands(handsToSort []Hand, cardsOrder string) []Hand {
 	isDone := false
 	sortedHands := make([]Hand, len(handsToSort))
 
 	copy(sortedHands, handsToSort)
 
-	// Bubble sort
 	for !isDone {
 		isDone = true
 		handIndex := 0
