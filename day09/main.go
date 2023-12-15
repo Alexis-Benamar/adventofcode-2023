@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-//go:embed example.txt
+//go:embed input.txt
 var data string
 var lines []string
 var valuesList [][]int
@@ -31,8 +31,8 @@ func init() {
 }
 
 func generateDiffGrid(values []int) []int {
-	diff := make([]int, len(values) - 1)
-	for i := 0; i < len(values) - 1; i++ {
+	diff := make([]int, len(values)-1)
+	for i := 0; i < len(values)-1; i++ {
 		diff[i] = values[i+1] - values[i]
 	}
 	return diff
@@ -73,24 +73,14 @@ func main() {
 			}
 		}
 
-		fmt.Println("\n", diffGrid)
-
-		for i := len(diffGrid) - 1; i >= 0; i-- {
-			if diffGrid[i][len(diffGrid[i]) - 1] == 0 {
-				continue
-			}
-
-			lastOfPrevRow := diffGrid[i+1][len(diffGrid[i+1]) - 1]
-			lastOfCurrent := diffGrid[i][len(diffGrid[i]) - 1]
-
-			fmt.Println("adding", lastOfCurrent + lastOfPrevRow)
-
-			diffGrid[i] = append(diffGrid[i], lastOfCurrent + lastOfPrevRow)
+		// Sum of last digit of each row gives next number
+		// Idea from this comment https://www.reddit.com/r/adventofcode/comments/18e5ytd/comment/kd8nbiu/
+		valueToAdd := 0
+		for _, values := range diffGrid {
+			valueToAdd += values[len(values)-1]
 		}
 
-		newValue := diffGrid[0][len(diffGrid[0]) - 1]
-		sumOfNextValues += newValue
-		fmt.Println("new value", newValue)
+		sumOfNextValues += valueToAdd
 	}
 
 	fmt.Println("\npart1:", sumOfNextValues)
