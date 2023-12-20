@@ -53,7 +53,7 @@ func isAllZeros(values []int) bool {
 func main() {
 	start := time.Now()
 
-	sumOfNextValues := 0
+	var sumOfNextValues, sumOfPreviousValues int
 
 	for _, values := range valuesList {
 		diffGrid := [][]int{values}
@@ -63,6 +63,7 @@ func main() {
 		for keepGoing {
 			isLastDiff := isAllZeros(currentDiff)
 			if isLastDiff {
+				currentDiff = append(currentDiff, 0)
 				keepGoing = false
 			}
 
@@ -73,18 +74,29 @@ func main() {
 			}
 		}
 
-		// Sum of last digit of each row gives next number
-		// Idea from this comment https://www.reddit.com/r/adventofcode/comments/18e5ytd/comment/kd8nbiu/
-		valueToAdd := 0
-		for _, values := range diffGrid {
-			valueToAdd += values[len(values)-1]
+		// Part 2, extrapolating backwards
+		for i := len(diffGrid)-1; i > 0; i-- {
+			diffGrid[i - 1] = append([]int{diffGrid[i - 1][0] - diffGrid[i][0]}, diffGrid[i-1]...)
+
+			// Add extrapolated value
+			if i - 1 == 0 {
+				sumOfPreviousValues += diffGrid[i - 1][0]
+			}
 		}
 
-		sumOfNextValues += valueToAdd
+		// Sum of last digit of each row gives next number
+		// Idea from this comment https://www.reddit.com/r/adventofcode/comments/18e5ytd/comment/kd8nbiu/
+		nextValueToAdd := 0
+		for _, values := range diffGrid {
+			nextValueToAdd += values[len(values)-1]
+		}
+
+		sumOfNextValues += nextValueToAdd
 	}
 
-	fmt.Println("\npart1:", sumOfNextValues)
+	fmt.Println("part1:", sumOfNextValues)
+	fmt.Println("part2:", sumOfPreviousValues)
 
 	elapsed := time.Since(start)
-	fmt.Printf("Execution time %f s\n", elapsed.Seconds())
+	fmt.Printf("\nExecution time %f s\n", elapsed.Seconds())
 }
